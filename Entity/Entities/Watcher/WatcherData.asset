@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc353db29740e4544af23532f8978a1b, type: 3}
+  m_Name: WatcherData
+  m_EditorClassIdentifier: 
+  entityIcon: {fileID: 21300000, guid: bb49748fa5f5cf742b67a338937223f5, type: 3}
+  id: 1
+  behaviour: {fileID: 11400000, guid: 7245e4b5b15d0b847a3c77b043a2b722, type: 2}
+  prefab: {fileID: 8723379247312848277, guid: 8efae859f3b5f3947badb0cf117cedcf, type: 3}
+  damage: 30
+  damageCause: Watcher
+  spawnWeight: 75
+  spawnThreshold: 80
+  spawnDelay: {x: 1, y: 3}
+  spawnType: 0

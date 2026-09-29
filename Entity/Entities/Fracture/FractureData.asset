@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc353db29740e4544af23532f8978a1b, type: 3}
+  m_Name: FractureData
+  m_EditorClassIdentifier: 
+  entityIcon: {fileID: 21300000, guid: 26b8ed6315cdb5041ac8b2c607cc0aa6, type: 3}
+  id: 3
+  behaviour: {fileID: 11400000, guid: 6f1a62d3e23de8f46b97c918c59800f1, type: 2}
+  prefab: {fileID: 6230907412102835851, guid: 9fd46b0d3fbfa0043b0be34e623e1b44, type: 3}
+  damage: 35
+  damageCause: Fracture
+  spawnWeight: 35
+  spawnThreshold: 30
+  spawnDelay: {x: 0, y: 0}
+  spawnType: 1

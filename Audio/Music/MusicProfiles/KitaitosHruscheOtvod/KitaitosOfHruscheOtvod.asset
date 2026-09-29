@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97f057686d972c946ad5ec7b1fa96b00, type: 3}
+  m_Name: KitaitosOfHruscheOtvod
+  m_EditorClassIdentifier: 
+  versions:
+  - {fileID: 8300000, guid: 66780c3e89ea6144bb445fa597e1a6ed, type: 3}
+  - {fileID: 8300000, guid: 34388df4fe9f7c946b8ee4fd3b8d9441, type: 3}
+  - {fileID: 8300000, guid: ee32d0861454b8441bd401df878f949e, type: 3}
+  - {fileID: 8300000, guid: 36008e4c96492594aa102a745cd9a7d8, type: 3}
+  - {fileID: 8300000, guid: a0a5e1d918afdab40ae23bcac9e2e25f, type: 3}
