@@ -1,73 +1,47 @@
-# HRUSCHEOTVOD — Technical Overview
+# HRUSCHEOTVOD - Technical Overview
 
-Technical showcase of the core systems used in **HRUSCHEOTVOD**, a procedural liminal horror game built with Unity and C#.
+This repository contains selected technical systems from HRUSCHEOTVOD, a procedural liminal horror game built with Unity.
 
-The repository focuses on the game's gameplay architecture, entity state machines, procedural room generation and supporting systems.
+The project focuses on procedural room generation, entity AI, state machines, event-driven communication, and modular gameplay systems.
 
 ## Architecture
 
-The project is organized around independent gameplay systems and managers rather than a single monolithic controller.
+The project is divided into several independent systems responsible for different gameplay concerns:
 
-Core systems communicate through dedicated managers and lightweight event-driven communication where appropriate.
+* Room generation
+* Entity AI
+* Entity spawning
+* Room lifecycle
+* Gameplay events
+* Shared managers and utilities
 
-```text
-Gameplay
-??? Entity System
-?   ??? Entity
-?   ??? Entity State Machine
-?   ??? Entity Behaviours
-?   ??? EntityData
-?
-??? Procedural Generation
-?   ??? RoomChainManager
-?   ??? Room
-?   ??? RoomData
-?   ??? Door / DoorSocket
-?   ??? RoomDeletionManager
-?
-??? Managers
-?   ??? EntitiesManager
-?   ??? PlayerManager
-?   ??? AtmosphereManager
-?   ??? AnalyticsManager
-?
-??? Utility
-    ??? GameEvents
-    ??? Singleton
-    ??? PositionFinder
-```
-
-The architecture separates **gameplay logic, entity behaviour, state transitions and procedural generation**, making individual systems easier to extend without modifying unrelated parts of the game.
+The systems communicate through managers, interfaces, ScriptableObjects, and C# events instead of relying on a single centralized gameplay script.
 
 ---
 
 ## Entity State Machine
 
-Entities use a dedicated **State Machine architecture**.
+The entity system is built around a state machine.
 
-The `Entity` component owns the currently active `IEntityState` and is responsible for state transitions:
+Main entry point:
 
-```text
-Entity
-   ?
-   ??? currentState : IEntityState
-   ?
-   ??? SetState()
-   ?
-   ??? Update()
-          ?
-          ?
-    IEntityState
-          ?
-    ?????????????????????
-    ?     ?             ?
- Walker  Watcher      Fracture
- State   State         State
-    ?
-    ??? ...additional states
+`Scripts/Entity/Entity.cs`
+
+State interface:
+
+`Scripts/Entity/IEntityState.cs`
+
+States:
+
+`Scripts/Entity/States/`
+
+The `Entity` component owns the current state and controls state transitions through:
+
+```csharp
+SetState(IEntityState newState)
 ```
 
-Every state follows the same lifecycle:
+Each state implements:
 
 ```csharp
 Enter(Entity entity)
@@ -75,150 +49,144 @@ Update()
 Exit()
 ```
 
-This keeps entity-specific behaviour out of the main `Entity` class and allows different enemies to reuse the same state-machine infrastructure.
+This separates entity behavior into independent states instead of putting all AI logic into one large class.
 
-The state machine is located under:
+Example structure:
 
-`Scripts/Entity/`
+```text
+Entity
+  |
+  +-- IEntityState
+        |
+        +-- Core
+        +-- Ephemer
+        +-- Fracture
+        +-- Glitch
+        +-- Walker
+        +-- Watcher
+```
 
-with the main entry point:
+Entity-specific behavior is also separated from the state machine:
 
-`Scripts/Entity/Entity.cs`
+`Scripts/Entity/Behaviours/`
 
-and the state contract:
-
-`Scripts/Entity/IEntityState.cs`
-
-States are grouped under:
-
-`Scripts/Entity/States/`
-
-The project also separates **behaviour** from **state**. `EntityBehaviour` implementations contain entity-specific behaviour/setup, while states control the entity's current gameplay state.
-
-Entity configuration is stored separately through `EntityData` ScriptableObjects:
+Entity configuration is stored in ScriptableObjects:
 
 `Scripts/Entity/EntityData.cs`
 
-This allows prefab, damage, spawn conditions, weights and behaviour references to be configured independently from the entity's runtime logic.
+This allows entity data, behavior, prefab, damage, spawn conditions, and other parameters to be configured independently from the runtime state machine.
 
 ---
 
 ## Procedural Generation
 
-The game's environment is generated dynamically as a chain of room prefabs.
-
-The main system responsible for this is:
+The main procedural generation system is:
 
 `Scripts/RoomsGeneration/RoomChainManager.cs`
 
-`RoomChainManager` maintains a linked list of currently active rooms and generates new rooms as the player progresses.
+`RoomChainManager` is responsible for building the room chain and selecting rooms during gameplay.
+
+The generation system uses room metadata rather than selecting completely random prefabs.
+
+Room data is defined in:
+
+`Scripts/RoomsGeneration/Room/Room.cs`
+
+Important parameters include:
+
+* Room weight
+* Room threshold
+* Room type
+* Available door sockets
+* Light sources
+
+Room selection therefore depends on the current generation context, available connections, and progression.
+
+Simplified structure:
 
 ```text
-Start Room
-    ?
-    ?
-???????????
-? Room 01 ?
-???????????
-     ?
-     ?
-???????????
-? Room 02 ?
-???????????
-     ?
-     ?
-???????????
-? Room 03 ?
-???????????
-     ?
-    ...
+RoomChainManager
+  |
+  +-- Select room
+  |
+  +-- Check generation conditions
+  |
+  +-- Match available sockets
+  |
+  +-- Instantiate room
+  |
+  +-- Connect room to the chain
+  |
+  +-- Continue generation
 ```
 
-Rooms are connected through `DoorSocket` objects. During generation the system:
-
-1. Selects a compatible room prefab.
-2. Finds a socket with the required direction.
-3. Calculates the required rotation and position.
-4. Aligns the new room with the previous room.
-5. Connects the two rooms with a generated door.
-6. Adds the room to the active room chain.
-
-Room selection uses several parameters:
-
-* **Socket direction** — only rooms with a compatible entry socket can be selected.
-* **Weight** — controls the probability of selecting a room.
-* **Room threshold** — prevents certain rooms from appearing before the required progression point.
-* **Room type** — supports `Basic`, `Unique` and `Ending` rooms.
-
-This creates a weighted procedural generation system while still allowing specific rooms and progression events to be controlled.
+The system also supports special room types and controlled generation sequences, allowing authored gameplay situations to exist inside an otherwise procedural environment.
 
 ---
 
-## Special Generation Chains
+## Room Lifecycle
 
-The generation system also supports special room sequences.
+Each generated room is represented by:
 
-`RoomChainManager` uses a generation state:
+`Scripts/RoomsGeneration/Room/Room.cs`
 
-```text
-Normal
-   ?
-   ?
-Unique Room
-   ?
-   ?
-WaitingForUniqueDecision
-   ?
-   ??? Correct Door ??? Normal
-   ?
-   ??? Wrong Door ????? SpecialChain
-                           ?
-                           ?
-                     Special Rooms
-                           ?
-                           ?
-                         Normal
-```
+A room is responsible for its own runtime lifecycle.
 
-This allows procedural generation to coexist with authored gameplay sequences.
+Examples of responsibilities:
 
-For example, a `Unique` room can temporarily take control of the generation flow. The player's door choice can then trigger a special chain of rooms before returning to normal procedural generation.
+* Initializing interactable objects
+* Managing door sockets
+* Activating the room when the player enters
+* Updating room-related systems
+* Managing lights
+* Tracking whether the player is inside
+* Closing and removing rooms when they are no longer needed
+
+This allows the generation manager to focus on creating the room chain while the individual room controls its own runtime behavior.
 
 ---
 
-## Room Lifecycle & Memory Management
+## Entity Spawning
 
-The procedural system does not keep the entire generated level in memory.
+Entity spawning is handled separately from the entity state machine.
 
-`RoomChainManager` maintains a forward and backward buffer of active rooms.
+Main manager:
 
-`RoomDeletionManager` removes rooms behind the player once they are no longer required.
+`Scripts/Entity/EntitiesManager.cs`
 
-This allows the game to create the impression of a much larger continuously generated environment while keeping the number of active rooms limited.
+The manager controls:
 
-Rooms also have their own lifecycle:
+* Spawn timing
+* Spawn chances
+* Enemy limits
+* Spawn conditions
+* Weighted entity selection
+* Room progression requirements
+* Spawn positions
+
+Entity configuration comes from `EntityData` ScriptableObjects.
+
+This keeps the responsibilities separated:
 
 ```text
-Instantiate
-    ?
-ActivateRoom()
-    ?
-Player enters
-    ?
-Gameplay
-    ?
-CloseRoom()
-    ?
-Destroy
+EntitiesManager
+  |
+  +-- Decides WHEN and WHAT to spawn
+  |
+  +-- Entity
+        |
+        +-- Controls HOW the entity behaves
 ```
-
-Room activation is also responsible for room-specific initialization such as lighting and randomized interior elements.
 
 ---
 
 ## Event-Driven Communication
 
-Several systems communicate through a lightweight event layer instead of directly referencing each other.
+The project also uses C# events for communication between systems.
+
+Main event container:
+
+`Scripts/Utility/GameEvents.cs`
 
 For example:
 
@@ -226,78 +194,26 @@ For example:
 GameEvents.OnDoorOpened
 ```
 
-is used by both the procedural generation system and the entity spawning system.
+Door-related events can be consumed by different systems without creating direct dependencies between them.
 
-This allows one gameplay action — opening a door — to trigger multiple independent systems:
+This is used by systems such as room generation and entity spawning.
 
-```text
-             Door Opened
-                  ?
-        ?????????????????????
-        ?                   ?
-RoomChainManager      EntitiesManager
-        ?                   ?
-Generate next room    Try spawn entity
-```
-
-This reduces direct coupling between gameplay systems.
-
----
-
-## Entity Spawning
-
-`EntitiesManager` controls enemy spawning independently from the entity state machine.
-
-Entity spawning can be triggered by:
-
-* opening doors;
-* timers;
-* configured spawn thresholds;
-* weighted random selection;
-* enemy count limits;
-* safe-room restrictions.
-
-Entity configuration is stored in `EntityData` ScriptableObjects, allowing different entity types to share the same spawning infrastructure.
-
-The spawning pipeline is approximately:
-
-```text
-EntitiesManager
-      ?
-      ?
-Select EntityData
-      ?
-      ?
-Find hidden spawn position
-      ?
-      ?
-Instantiate prefab
-      ?
-      ?
-Entity.Initialize()
-      ?
-      ?
-Behaviour.Initialize()
-      ?
-      ?
-Entity State Machine
-```
+The approach helps reduce coupling between gameplay systems and makes it easier to add new listeners without modifying the original event source.
 
 ---
 
 ## Key Technical Concepts
 
-The project demonstrates several gameplay-programming concepts:
+The main technical concepts demonstrated in this repository are:
 
-* **State Machine Pattern** for enemy behaviour.
-* **Procedural Generation** using weighted room selection.
-* **ScriptableObject-based data configuration**.
-* **Event-driven communication** between gameplay systems.
-* **Dynamic room instantiation and deletion**.
-* **Object lifecycle management** for procedurally generated content.
-* **Separation of runtime logic and configuration data**.
-* **Reusable Singleton-based managers** for global gameplay systems.
-* **Modular entity behaviours and states**.
-* **Progression-based procedural content** through room thresholds and unique rooms.
+* State Machine
+* Procedural Generation
+* Weighted Random Selection
+* ScriptableObject-based configuration
+* Event-driven architecture
+* Modular entity behavior
+* Runtime room lifecycle management
+* Singleton-based managers
+* Separation of data, spawning, and runtime behavior
 
-The repository intentionally focuses on the **technical implementation of the game's core systems** rather than the complete Unity project and its assets.
+The repository intentionally contains selected technical systems rather than the complete game project.
