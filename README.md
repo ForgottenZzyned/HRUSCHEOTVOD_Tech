@@ -4,6 +4,24 @@ This repository contains selected technical systems from HRUSCHEOTVOD, a procedu
 
 The project focuses on procedural room generation, entity AI, state machines, event-driven communication, and modular gameplay systems.
 
+## Key Technical Concepts
+
+The main technical concepts demonstrated in this repository are:
+
+* State Machine
+* Procedural Generation
+* Weighted Random Selection
+* ScriptableObject-based configuration
+* Event-driven architecture
+* Modular entity behavior
+* Runtime room lifecycle management
+* Singleton-based managers
+* Separation of data, spawning, and runtime behavior
+
+The repository intentionally contains selected technical systems rather than the complete game project.
+
+---
+
 ## Architecture
 
 The project is divided into several independent systems responsible for different gameplay concerns:
@@ -201,19 +219,3 @@ This is used by systems such as room generation and entity spawning.
 The approach helps reduce coupling between gameplay systems and makes it easier to add new listeners without modifying the original event source.
 
 ---
-
-## Key Technical Concepts
-
-The main technical concepts demonstrated in this repository are:
-
-* State Machine
-* Procedural Generation
-* Weighted Random Selection
-* ScriptableObject-based configuration
-* Event-driven architecture
-* Modular entity behavior
-* Runtime room lifecycle management
-* Singleton-based managers
-* Separation of data, spawning, and runtime behavior
-
-The repository intentionally contains selected technical systems rather than the complete game project.
