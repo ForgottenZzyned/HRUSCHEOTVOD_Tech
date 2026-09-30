@@ -55,9 +55,7 @@ States:
 
 The `Entity` component owns the current state and controls state transitions through:
 
-```csharp
-SetState(IEntityState newState)
-```
+`SetState(IEntityState newState)`
 
 Each state implements:
 
