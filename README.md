@@ -59,17 +59,17 @@ The `Entity` component owns the current state and controls state transitions thr
 
 Each state implements:
 
-```csharp
+`
 Enter(Entity entity)
 Update()
 Exit()
-```
+`
 
 This separates entity behavior into independent states instead of putting all AI logic into one large class.
 
 Example structure:
 
-```text
+`
 Entity
   |
   +-- IEntityState
@@ -80,7 +80,7 @@ Entity
         +-- Glitch
         +-- Walker
         +-- Watcher
-```
+`
 
 Entity-specific behavior is also separated from the state machine:
 
@@ -120,7 +120,7 @@ Room selection therefore depends on the current generation context, available co
 
 Simplified structure:
 
-```text
+`
 RoomChainManager
   |
   +-- Select room
@@ -134,7 +134,7 @@ RoomChainManager
   +-- Connect room to the chain
   |
   +-- Continue generation
-```
+`
 
 The system also supports special room types and controlled generation sequences, allowing authored gameplay situations to exist inside an otherwise procedural environment.
 
@@ -184,7 +184,7 @@ Entity configuration comes from `EntityData` ScriptableObjects.
 
 This keeps the responsibilities separated:
 
-```text
+`
 EntitiesManager
   |
   +-- Decides WHEN and WHAT to spawn
@@ -192,7 +192,7 @@ EntitiesManager
   +-- Entity
         |
         +-- Controls HOW the entity behaves
-```
+`
 
 ---
 
@@ -206,9 +206,9 @@ Main event container:
 
 For example:
 
-```csharp
+`
 GameEvents.OnDoorOpened
-```
+`
 
 Door-related events can be consumed by different systems without creating direct dependencies between them.
 
